@@ -1,0 +1,33 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/resource-db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+  sql:
+    init:
+      mode: always
+cloud:
+  aws:
+    stack:
+      auto: false
+    credentials:
+      instanceProfile: false
+      accessKey: local-dev-access-key
+      secretKey: local-dev-secret-key
+    s3:
+      bucket: resource-bucket
+    region:
+      static: us-east-1
+    endpoint:
+      s3: http://localhost:4566/
