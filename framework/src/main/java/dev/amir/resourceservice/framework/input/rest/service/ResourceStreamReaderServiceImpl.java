@@ -3,10 +3,11 @@ package dev.amir.resourceservice.framework.input.rest.service;
 import dev.amir.resourceservice.application.usecase.ResourceManagementUseCase;
 import dev.amir.resourceservice.domain.entity.ByteRange;
 import dev.amir.resourceservice.domain.entity.Resource;
+import dev.amir.resourceservice.framework.input.rest.request.GetResourceRequest;
+import dev.amir.resourceservice.framework.input.rest.response.GetResourceResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Service
 @RequiredArgsConstructor
@@ -14,18 +15,24 @@ public class ResourceStreamReaderServiceImpl implements ResourceStreamReaderServ
     private final static String CONTENT_RANGE_FORMAT = "bytes %d-%d/%d";
 
     private final ResourceManagementUseCase resourceManagementUseCase;
+    private final ByteRangeConverter byteRangeConverter;
     private final ResourceService resourceService;
 
     @Override
-    public ResponseEntity<StreamingResponseBody> getResponse(Long resourceId) {
+    public ResponseEntity<GetResourceResponse> getResource(GetResourceRequest request) {
+        return byteRangeConverter.convert(request.getRangeHeader())
+                .map(range -> getPartialResponse(request.getId(), range))
+                .orElseGet(() -> getResponse(request.getId()));
+    }
+
+    private ResponseEntity<GetResourceResponse> getResponse(Long resourceId) {
         var resource = resourceService.getResourceById(resourceId);
         var response = buildResponseTemplate(resource, HttpStatus.OK);
 
         return response.body(outputStream -> outputStream.write(resourceManagementUseCase.getResourceData(resource)));
     }
 
-    @Override
-    public ResponseEntity<StreamingResponseBody> getPartialResponse(Long resourceId, ByteRange byteRange) {
+    private ResponseEntity<GetResourceResponse> getPartialResponse(Long resourceId, ByteRange byteRange) {
         var resource = resourceService.getResourceById(resourceId);
         var HttpStatusCode = buildStatusCode(byteRange.getStartByte(), byteRange.getEndByte(), resource.getContentLength());
         var response = buildResponseTemplate(resource, HttpStatusCode);

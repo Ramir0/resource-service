@@ -3,6 +3,7 @@ package dev.amir.resourceservice.framework.input.rest.service;
 import dev.amir.resourceservice.application.usecase.ResourceManagementUseCase;
 import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.domain.exception.UnexpectedResourceException;
+import dev.amir.resourceservice.framework.input.rest.request.CreateResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.request.DeleteResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.response.CreateResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.DeleteResourceResponse;
@@ -21,8 +22,8 @@ public class ResourceServiceImpl implements ResourceService {
     private final ResourceManagementUseCase resourceManagementUseCase;
 
     @Override
-    public ResponseEntity<CreateResourceResponse> createResource(byte[] resourceData) {
-        var resource = resourceManagementUseCase.createResource(resourceData);
+    public ResponseEntity<CreateResourceResponse> createResource(CreateResourceRequest request) {
+        var resource = resourceManagementUseCase.createResource(request.getResourceData());
         return ResponseEntity.ok(new CreateResourceResponse(resource.getId()));
     }
 
