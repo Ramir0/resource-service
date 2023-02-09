@@ -1,5 +1,6 @@
 package dev.amir.resourceservice.domain.entity;
 
+import dev.amir.resourceservice.domain.vo.ResourceName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class Resource {
     private Long id;
-    private String name;
+    private ResourceName name;
     private String path;
     private String contentType;
     private Long contentLength;

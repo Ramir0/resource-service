@@ -8,6 +8,7 @@ import dev.amir.resourceservice.application.validator.ContentTypeValidator;
 import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.domain.exception.InvalidResourceException;
 import dev.amir.resourceservice.domain.exception.ResourceNotFoundException;
+import dev.amir.resourceservice.domain.vo.ResourceName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,8 +16,6 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -34,12 +33,10 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
             throw new InvalidResourceException("Invalid content type");
         }
 
-        var name = UUID.randomUUID().toString();
-        var path = new SimpleDateFormat("yyyy-MM").format(new Date());
         long contentLength = resourceMetaDataManager.getContentLength(resourceData);
         var resource = Resource.builder()
-                .name(name)
-                .path(path)
+                .name(buildName())
+                .path(buildPath())
                 .contentType(contentType)
                 .contentLength(contentLength)
                 .build();
@@ -75,5 +72,13 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
         resourcePersistenceOutputPort.deleteResourceById(existingResourcesIds);
 
         return existingResourcesIds;
+    }
+
+    private ResourceName buildName() {
+        return ResourceName.newInstance();
+    }
+
+    private String buildPath() {
+        return new SimpleDateFormat("yyyy-MM").format(System.currentTimeMillis());
     }
 }
