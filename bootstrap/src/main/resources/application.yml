@@ -18,6 +18,16 @@ spring:
   sql:
     init:
       mode: always
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      bootstrap-servers: localhost:9092
+    topics:
+      resource-process: resource.process
+  retry:
+    maxAttempts: 3
+    maxDelayInMillis: 1000
 cloud:
   aws:
     stack:

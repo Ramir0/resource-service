@@ -1,5 +1,6 @@
 package dev.amir.resourceservice.application.port.input;
 
+import dev.amir.resourceservice.application.manager.ResourceMessageManager;
 import dev.amir.resourceservice.application.manager.ResourceMetaDataManager;
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort;
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort;
@@ -25,6 +26,7 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
     private final ContentTypeValidator contentTypeValidator;
     private final ResourceDataStorageOutputPort resourceDataStorageOutputPort;
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort;
+    private final ResourceMessageManager resourceMessageManager;
 
     @Override
     public Resource createResource(byte[] resourceData) {
@@ -34,17 +36,19 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
         }
 
         long contentLength = resourceMetaDataManager.getContentLength(resourceData);
-        var resource = Resource.builder()
+        var newResource = Resource.builder()
                 .name(buildName())
                 .path(buildPath())
                 .contentType(contentType)
                 .contentLength(contentLength)
                 .build();
 
-        resourceDataStorageOutputPort.uploadResource(resource, resourceData);
-        resource.setCreatedAt(Instant.now());
+        resourceDataStorageOutputPort.uploadResource(newResource, resourceData);
+        newResource.setCreatedAt(Instant.now());
 
-        return resourcePersistenceOutputPort.saveResource(resource);
+        var savedResource = resourcePersistenceOutputPort.saveResource(newResource);
+        resourceMessageManager.sendProcessResourceMessage(savedResource);
+        return savedResource;
     }
 
     @Override

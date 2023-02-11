@@ -9,6 +9,7 @@ public interface ResourcePersistenceOutputPort {
     Resource saveResource(Resource resource);
 
     Optional<Resource> getResourceById(Long resourceId);
+
     Collection<Resource> getAllResourceById(Collection<Long> resourceIds);
 
     void deleteResourceById(Collection<Long> ids);

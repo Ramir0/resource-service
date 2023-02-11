@@ -6,7 +6,9 @@ import java.util.Collection;
 
 public interface ResourceDataStorageOutputPort {
     void uploadResource(Resource resource, byte[] resourceData);
+
     byte[] downloadResource(Resource resource);
+
     byte[] downloadResource(Resource resource, long start, long end);
 
     void deleteResources(Collection<Resource> resources);

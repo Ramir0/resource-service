@@ -1,5 +1,6 @@
 package dev.amir.resourceservice.application.port.input
 
+import dev.amir.resourceservice.application.manager.ResourceMessageManager
 import dev.amir.resourceservice.application.manager.ResourceMetaDataManager
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort
@@ -14,9 +15,10 @@ class ResourceManagementInputPortSpec extends Specification {
     private final ResourceMetaDataManager resourceMetaDataManager = Mock()
     private final ResourceDataStorageOutputPort resourceDataStorageOutputPort = Mock()
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort = Mock()
+    private final ResourceMessageManager resourceMessageManager = Mock()
     private final ContentTypeValidator contentTypeValidator = Mock()
 
-    private final ResourceManagementInputPort resourceManagementInputPort = new ResourceManagementInputPort(resourceMetaDataManager, contentTypeValidator, resourceDataStorageOutputPort, resourcePersistenceOutputPort)
+    private final ResourceManagementInputPort resourceManagementInputPort = new ResourceManagementInputPort(resourceMetaDataManager, contentTypeValidator, resourceDataStorageOutputPort, resourcePersistenceOutputPort, resourceMessageManager)
 
     def "createResource should return a Resource with correct data when content type is valid"() {
         Resource resource = null
@@ -34,6 +36,7 @@ class ResourceManagementInputPortSpec extends Specification {
         1 * contentTypeValidator.isContentTypeValid(contentType) >> true
         1 * resourceDataStorageOutputPort.uploadResource(_ as Resource, resourceData)
         1 * resourcePersistenceOutputPort.saveResource(_ as Resource) >> { arguments -> resource = arguments.get(0) }
+        1 * resourceMessageManager.sendProcessResourceMessage(_ as Resource)
 
         and:
         !resource.id
