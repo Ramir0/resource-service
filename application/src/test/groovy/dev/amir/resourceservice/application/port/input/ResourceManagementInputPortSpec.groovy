@@ -4,7 +4,7 @@ import dev.amir.resourceservice.application.manager.ResourceMessageManager
 import dev.amir.resourceservice.application.manager.ResourceMetaDataManager
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort
-import dev.amir.resourceservice.application.validator.ContentTypeValidator
+import dev.amir.resourceservice.application.validator.ResourceMetadataValidator
 import dev.amir.resourceservice.domain.entity.Resource
 import spock.lang.Specification
 
@@ -16,9 +16,9 @@ class ResourceManagementInputPortSpec extends Specification {
     private final ResourceDataStorageOutputPort resourceDataStorageOutputPort = Mock()
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort = Mock()
     private final ResourceMessageManager resourceMessageManager = Mock()
-    private final ContentTypeValidator contentTypeValidator = Mock()
+    private final ResourceMetadataValidator resourceMetadataValidator = Mock()
 
-    private final ResourceManagementInputPort resourceManagementInputPort = new ResourceManagementInputPort(resourceMetaDataManager, contentTypeValidator, resourceDataStorageOutputPort, resourcePersistenceOutputPort, resourceMessageManager)
+    private final ResourceManagementInputPort resourceManagementInputPort = new ResourceManagementInputPort(resourceMetaDataManager, resourceMetadataValidator, resourceDataStorageOutputPort, resourcePersistenceOutputPort, resourceMessageManager)
 
     def "createResource should return a Resource with correct data when content type is valid"() {
         Resource resource = null
@@ -33,7 +33,8 @@ class ResourceManagementInputPortSpec extends Specification {
         then:
         1 * resourceMetaDataManager.getContentType(resourceData) >> contentType
         1 * resourceMetaDataManager.getContentLength(resourceData) >> contentLength
-        1 * contentTypeValidator.isContentTypeValid(contentType) >> true
+        1 * resourceMetadataValidator.isContentTypeInvalid(contentType) >> false
+        1 * resourceMetadataValidator.isContentLengthInvalid(contentLength) >> false
         1 * resourceDataStorageOutputPort.uploadResource(_ as Resource, resourceData)
         1 * resourcePersistenceOutputPort.saveResource(_ as Resource) >> { arguments -> resource = arguments.get(0) }
         1 * resourceMessageManager.sendProcessResourceMessage(_ as Resource)

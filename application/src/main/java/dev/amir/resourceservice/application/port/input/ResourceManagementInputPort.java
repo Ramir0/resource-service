@@ -5,7 +5,7 @@ import dev.amir.resourceservice.application.manager.ResourceMetaDataManager;
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort;
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort;
 import dev.amir.resourceservice.application.usecase.ResourceManagementUseCase;
-import dev.amir.resourceservice.application.validator.ContentTypeValidator;
+import dev.amir.resourceservice.application.validator.ResourceMetadataValidator;
 import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.domain.exception.InvalidResourceException;
 import dev.amir.resourceservice.domain.exception.ResourceNotFoundException;
@@ -23,7 +23,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ResourceManagementInputPort implements ResourceManagementUseCase {
     private final ResourceMetaDataManager resourceMetaDataManager;
-    private final ContentTypeValidator contentTypeValidator;
+    private final ResourceMetadataValidator resourceMetadataValidator;
     private final ResourceDataStorageOutputPort resourceDataStorageOutputPort;
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort;
     private final ResourceMessageManager resourceMessageManager;
@@ -31,20 +31,17 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
     @Override
     public Resource createResource(byte[] resourceData) {
         var contentType = resourceMetaDataManager.getContentType(resourceData);
-        if (!contentTypeValidator.isContentTypeValid(contentType)) {
+        if (resourceMetadataValidator.isContentTypeInvalid(contentType)) {
             throw new InvalidResourceException("Invalid content type");
         }
 
         long contentLength = resourceMetaDataManager.getContentLength(resourceData);
-        var newResource = Resource.builder()
-                .name(buildName())
-                .path(buildPath())
-                .contentType(contentType)
-                .contentLength(contentLength)
-                .build();
+        if (resourceMetadataValidator.isContentLengthInvalid(contentLength)) {
+            throw new InvalidResourceException("Invalid content length");
+        }
 
+        var newResource = buildResource(contentLength, contentType);
         resourceDataStorageOutputPort.uploadResource(newResource, resourceData);
-        newResource.setCreatedAt(Instant.now());
 
         var savedResource = resourcePersistenceOutputPort.saveResource(newResource);
         resourceMessageManager.sendProcessResourceMessage(savedResource);
@@ -76,6 +73,16 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
         resourcePersistenceOutputPort.deleteResourceById(existingResourcesIds);
 
         return existingResourcesIds;
+    }
+
+    private Resource buildResource(long contentLength, String contentType) {
+        return Resource.builder()
+                .name(buildName())
+                .path(buildPath())
+                .contentType(contentType)
+                .contentLength(contentLength)
+                .createdAt(Instant.now())
+                .build();
     }
 
     private ResourceName buildName() {
