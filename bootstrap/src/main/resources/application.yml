@@ -22,15 +22,18 @@ spring:
   sql:
     init:
       mode: always
-  kafka:
-    bootstrap-servers: localhost:9092
-    delivery:
-      timeout: 5000
-    topics:
-      resource-process: resource.process
   retry:
-    maxAttempts: 3
-    maxDelayInMillis: 1000
+    max-attempts: 3
+    initial-interval: 500
+    multiplier: 2
+    max-interval: 30000
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    queues:
+      resource-process: q.resource-process
 
 cloud:
   aws:
@@ -46,7 +49,3 @@ cloud:
       static: us-east-1
     endpoint:
       s3: http://localhost:4566/
-
-logging:
-  level:
-    org.apache.kafka: ERROR
