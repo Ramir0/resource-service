@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "dev.amir.resourceservice.application",
         "dev.amir.resourceservice.domain"
 })
-@EnableJpaRepositories("dev.amir.resourceservice.framework")
+@EnableJpaRepositories("dev.amir.resourceservice.framework.output.sql")
 public class App {
     public static void main(String[] args) {
         SpringApplication.run(App.class, args);

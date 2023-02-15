@@ -35,7 +35,7 @@ public class JpaConfiguration {
     }
 
     private Map<String, Object> jpaProperties() {
-        Map<String, Object> properties = new HashMap<>();
+        var properties = new HashMap<String, Object>();
         properties.put("jakarta.persistence.sharedCache.mode", SharedCacheMode.ENABLE_SELECTIVE);
         return properties;
     }
