@@ -1,6 +1,10 @@
 server:
   port: 8081
+
 spring:
+  devtools:
+    restart:
+      enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5432/resource-db
     username: postgres
@@ -27,6 +31,7 @@ spring:
   retry:
     maxAttempts: 3
     maxDelayInMillis: 1000
+
 cloud:
   aws:
     stack:

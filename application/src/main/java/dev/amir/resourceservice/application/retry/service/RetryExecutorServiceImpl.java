@@ -15,6 +15,9 @@ public class RetryExecutorServiceImpl implements RetryExecutorService {
     @Override
     public void execute(RetryCallback callback) {
         retryTemplate.execute(retryContext -> {
+            if (retryContext.getRetryCount() > 0) {
+                log.warn("Retry count: {}", retryContext.getRetryCount());
+            }
             callback.execute();
             return null;
         });
