@@ -14,6 +14,6 @@ public class ResourceMessageManagerImpl implements ResourceMessageManager {
 
     @Override
     public void sendProcessResourceMessage(Resource resource) {
-        retryExecutorService.executeAndRecover(() -> resourceMessageProducerOutputPort.sendProcessResourceMessage(resource));
+        retryExecutorService.execute(() -> resourceMessageProducerOutputPort.sendProcessResourceMessage(resource));
     }
 }

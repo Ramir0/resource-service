@@ -19,8 +19,9 @@ spring:
     init:
       mode: always
   kafka:
-    producer:
-      bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9092
+    delivery:
+      timeout: 5000
     topics:
       resource-process: resource.process
   retry:
@@ -40,3 +41,7 @@ cloud:
       static: us-east-1
     endpoint:
       s3: http://localhost:4566/
+
+logging:
+  level:
+    org.apache.kafka: ERROR

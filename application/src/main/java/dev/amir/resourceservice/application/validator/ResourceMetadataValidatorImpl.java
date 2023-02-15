@@ -13,6 +13,6 @@ public class ResourceMetadataValidatorImpl implements ResourceMetadataValidator 
 
     @Override
     public boolean isContentLengthInvalid(long contentLength) {
-        return contentLength > 0;
+        return contentLength <= 0;
     }
 }
