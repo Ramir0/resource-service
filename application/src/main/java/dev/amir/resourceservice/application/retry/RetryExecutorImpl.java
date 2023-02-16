@@ -1,6 +1,5 @@
-package dev.amir.resourceservice.application.retry.service;
+package dev.amir.resourceservice.application.retry;
 
-import dev.amir.resourceservice.application.retry.RetryCallback;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.support.RetryTemplate;
@@ -9,11 +8,11 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class RetryExecutorServiceImpl implements RetryExecutorService {
+public class RetryExecutorImpl implements RetryExecutor {
     private final RetryTemplate retryTemplate;
 
     @Override
-    public void execute(RetryCallback callback) {
+    public void execute(RetryAction callback) {
         retryTemplate.execute(retryContext -> {
             if (retryContext.getRetryCount() > 0) {
                 log.warn("Retry count: {}", retryContext.getRetryCount());

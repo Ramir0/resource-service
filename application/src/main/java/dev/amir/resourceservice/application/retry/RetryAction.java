@@ -1,6 +1,6 @@
 package dev.amir.resourceservice.application.retry;
 
 @FunctionalInterface
-public interface RetryCallback {
+public interface RetryAction {
     void execute();
 }
