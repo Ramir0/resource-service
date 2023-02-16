@@ -15,7 +15,7 @@ public class RetryExecutorImpl implements RetryExecutor {
     public void execute(RetryAction callback) {
         retryTemplate.execute(retryContext -> {
             if (retryContext.getRetryCount() > 0) {
-                log.warn("Retry count: {}", retryContext.getRetryCount());
+                log.warn("Retry count: [{}] Error message: [{}]", retryContext.getRetryCount(), retryContext.getLastThrowable().getMessage());
             }
             callback.execute();
             return null;
