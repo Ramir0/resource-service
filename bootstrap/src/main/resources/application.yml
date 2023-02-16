@@ -24,7 +24,7 @@ spring:
       mode: always
   retry:
     max-attempts: 3
-    initial-interval: 500
+    initial-interval: 1000
     multiplier: 2
     max-interval: 30000
   rabbitmq:
