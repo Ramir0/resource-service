@@ -34,13 +34,15 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
             var objectKey = buildObjectKey(resource);
             var inputStream = new ByteArrayInputStream(resourceData);
             var metadata = buildMetadata(resource.getContentType(), resource.getContentLength());
+            log.info("Uploading ResourceData with ObjectKey: [{}] to S3", objectKey);
             var result = s3Client.putObject(bucketName, objectKey, inputStream, metadata);
             if (Objects.isNull(result) || !StringUtils.hasText(result.getETag())) {
-                throw new UnexpectedResourceException("Operation was unsuccessful: resource was not uploaded to S3");
+                throw new UnexpectedResourceException("Failed Operation: ResourceData was not uploaded to S3");
             }
         } catch (AmazonClientException | NullPointerException exception) {
             throw new UnexpectedResourceException(exception);
         }
+        log.info("ResourceData was successfully uploaded");
     }
 
     @Override
@@ -58,20 +60,6 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
         var request = new GetObjectRequest(bucketName, objectKey);
         request.setRange(fixedStart, fixedEnd);
         return downloadResource(request);
-    }
-
-    private long getFixedStart(Resource resource, Long start, Long end) {
-        return start == null || start < 0L ?
-                resource.getContentLength() - end :
-                start;
-    }
-
-
-    private long getFixedEnd(Resource resource, Long start, Long end) {
-        long length = resource.getContentLength();
-        return end == null || end < 0L || end + start > length ?
-                length :
-                end + start;
     }
 
     @Override
@@ -95,7 +83,22 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
         }
     }
 
+    private long getFixedStart(Resource resource, Long start, Long end) {
+        return start == null || start < 0L ?
+                resource.getContentLength() - end :
+                start;
+    }
+
+
+    private long getFixedEnd(Resource resource, Long start, Long end) {
+        long length = resource.getContentLength();
+        return end == null || end < 0L || end + start > length ?
+                length :
+                end + start;
+    }
+
     private byte[] downloadResource(GetObjectRequest request) {
+        log.info("Downloading ResourceData with ObjectKey: [{}] to S3", request.getKey());
         try {
             S3Object response = s3Client.getObject(request);
             return IOUtils.toByteArray(response.getObjectContent());

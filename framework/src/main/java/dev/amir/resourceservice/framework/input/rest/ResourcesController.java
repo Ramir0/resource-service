@@ -10,12 +10,14 @@ import dev.amir.resourceservice.framework.input.rest.service.ResourceService;
 import dev.amir.resourceservice.framework.input.rest.service.ResourceStreamReaderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
+@Slf4j
 @Validated
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("resources")
 public class ResourcesController {
@@ -26,6 +28,7 @@ public class ResourcesController {
     public ResponseEntity<CreateResourceResponse> createResource(
             @RequestBody byte[] requestBody) {
         var request = new CreateResourceRequest(requestBody);
+        log.info("Request: Create Resource with size: {}", requestBody.length);
         return resourceService.createResource(request);
     }
 
@@ -34,12 +37,15 @@ public class ResourcesController {
             @PathVariable("id") Long resourceId,
             @RequestHeader(value = "Range", required = false) String rangeHeader) {
         var request = new GetResourceRequest(resourceId, rangeHeader);
+        log.info("Request: {}", request);
         return resourceStreamReaderService.getResource(request);
     }
 
     @DeleteMapping()
     public ResponseEntity<DeleteResourceResponse> deleteResource(
             @Valid @RequestParam("id") DeleteResourceRequest request) {
+        log.info("Request: {}", request);
         return resourceService.deleteResource(request);
     }
 }
+

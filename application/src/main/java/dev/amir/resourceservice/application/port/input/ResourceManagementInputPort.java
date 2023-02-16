@@ -40,11 +40,13 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
             throw new InvalidResourceException("Invalid content length");
         }
 
+        log.info("ResourceData validated with Content-Type: [{}] Content-Length: [{}]", contentType, contentLength);
         var newResource = buildResource(contentLength, contentType);
         resourceDataStorageOutputPort.uploadResource(newResource, resourceData);
-
         var savedResource = resourcePersistenceOutputPort.saveResource(newResource);
         resourceMessageManager.sendProcessResourceMessage(savedResource);
+        log.info("Resource with Id: [{}] was successfully created", savedResource.getId());
+
         return savedResource;
     }
 
@@ -56,11 +58,13 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
 
     @Override
     public byte[] getResourceData(Resource resource) {
+        log.info("Get ResourceData of Resource with Id [{}]", resource.getId());
         return resourceDataStorageOutputPort.downloadResource(resource);
     }
 
     @Override
     public byte[] getPartialResourceData(Resource resource, Long start, Long end) {
+        log.info("Get partial (Start: [{}] End: [{}]) ResourceData of Resource with Id [{}]", start, end, resource.getId());
         return resourceDataStorageOutputPort.downloadResource(resource, start, end);
     }
 

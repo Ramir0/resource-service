@@ -5,6 +5,7 @@ import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.framework.output.sql.mapper.ResourceEntityMapper;
 import dev.amir.resourceservice.framework.output.sql.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourcePersistenceSqlAdapter implements ResourcePersistenceOutputPort {
@@ -21,7 +23,9 @@ public class ResourcePersistenceSqlAdapter implements ResourcePersistenceOutputP
 
     @Override
     public Resource saveResource(Resource resource) {
+        log.info("Saving [{}]", resource);
         var resourceEntity = resourceRepository.save(Objects.requireNonNull(mapper.convert(resource)));
+        log.info("Resource was successfully saved with Id: [{}]", resourceEntity.getId());
         return Objects.requireNonNull(mapper.convert(resourceEntity));
     }
 

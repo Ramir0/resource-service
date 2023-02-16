@@ -4,8 +4,10 @@ import dev.amir.resourceservice.application.port.output.ResourceMessageProducerO
 import dev.amir.resourceservice.application.retry.RetryExecutor;
 import dev.amir.resourceservice.domain.entity.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ResourceMessageManagerImpl implements ResourceMessageManager {
@@ -14,6 +16,7 @@ public class ResourceMessageManagerImpl implements ResourceMessageManager {
 
     @Override
     public void sendProcessResourceMessage(Resource resource) {
+        log.info("Sending Resource with Id: [{}] to be processed", resource.getId());
         retryExecutor.execute(() -> resourceMessageProducerOutputPort.sendProcessResourceMessage(resource));
     }
 }
