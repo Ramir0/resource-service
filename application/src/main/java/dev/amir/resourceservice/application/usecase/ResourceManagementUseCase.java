@@ -11,7 +11,7 @@ public interface ResourceManagementUseCase {
 
     byte[] getResourceData(Resource resource);
 
-    byte[] getPartialResourceData(Resource resource, long start, long end);
+    byte[] getPartialResourceData(Resource resource, Long start, Long end);
 
     Collection<Long> deleteResourceById(Collection<Long> ids);
 }

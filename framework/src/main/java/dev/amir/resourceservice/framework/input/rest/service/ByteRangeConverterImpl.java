@@ -1,6 +1,7 @@
 package dev.amir.resourceservice.framework.input.rest.service;
 
 import dev.amir.resourceservice.domain.entity.ByteRange;
+import dev.amir.resourceservice.domain.exception.InvalidResourceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 public class ByteRangeConverterImpl implements ByteRangeConverter {
-    private static final Pattern RANGE_HEADER_PATTERN = Pattern.compile("^bytes=(\\d+)-(\\d+)$");
+    private static final Pattern RANGE_HEADER_PATTERN = Pattern.compile("^bytes=(\\d*)-(\\d*)$");
 
     @Override
     public Optional<ByteRange> convert(String rangeHeader) {
@@ -26,8 +27,15 @@ public class ByteRangeConverterImpl implements ByteRangeConverter {
         }
 
         var byteRange = new ByteRange();
-        byteRange.setStartByte(Long.valueOf(matcher.group(1)));
-        byteRange.setEndByte(Long.valueOf(matcher.group(2)));
+        if (StringUtils.hasText(matcher.group(1))) {
+            byteRange.setStartByte(Long.valueOf(matcher.group(1)));
+        }
+        if (StringUtils.hasText(matcher.group(2))) {
+            byteRange.setEndByte(Long.valueOf(matcher.group(2)));
+        }
+        if (byteRange.getEndByte() == null && byteRange.getStartByte() == null) {
+            throw new InvalidResourceException("Range Header must have at least one value");
+        }
         return Optional.of(byteRange);
     }
 }

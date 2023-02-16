@@ -51,11 +51,27 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
     }
 
     @Override
-    public byte[] downloadResource(Resource resource, long start, long end) {
+    public byte[] downloadResource(Resource resource, Long start, Long end) {
         var objectKey = buildObjectKey(resource);
+        long fixedStart = getFixedStart(resource, start, end);
+        long fixedEnd = getFixedEnd(resource, fixedStart, end);
         var request = new GetObjectRequest(bucketName, objectKey);
-        request.setRange(start, end);
+        request.setRange(fixedStart, fixedEnd);
         return downloadResource(request);
+    }
+
+    private long getFixedStart(Resource resource, Long start, Long end) {
+        return start == null || start < 0L ?
+                resource.getContentLength() - end :
+                start;
+    }
+
+
+    private long getFixedEnd(Resource resource, Long start, Long end) {
+        long length = resource.getContentLength();
+        return end == null || end < 0L || end + start > length ?
+                length :
+                end + start;
     }
 
     @Override

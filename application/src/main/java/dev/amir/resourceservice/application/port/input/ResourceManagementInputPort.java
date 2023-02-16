@@ -60,7 +60,7 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
     }
 
     @Override
-    public byte[] getPartialResourceData(Resource resource, long start, long end) {
+    public byte[] getPartialResourceData(Resource resource, Long start, Long end) {
         return resourceDataStorageOutputPort.downloadResource(resource, start, end);
     }
 

@@ -9,7 +9,7 @@ public interface ResourceDataStorageOutputPort {
 
     byte[] downloadResource(Resource resource);
 
-    byte[] downloadResource(Resource resource, long start, long end);
+    byte[] downloadResource(Resource resource, Long start, Long end);
 
     void deleteResources(Collection<Resource> resources);
 }
