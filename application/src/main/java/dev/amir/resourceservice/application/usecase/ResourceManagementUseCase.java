@@ -1,5 +1,6 @@
 package dev.amir.resourceservice.application.usecase;
 
+import dev.amir.resourceservice.domain.entity.ByteRange;
 import dev.amir.resourceservice.domain.entity.Resource;
 
 import java.util.Collection;
@@ -11,7 +12,7 @@ public interface ResourceManagementUseCase {
 
     byte[] getResourceData(Resource resource);
 
-    byte[] getPartialResourceData(Resource resource, Long start, Long end);
+    byte[] getPartialResourceData(Resource resource, ByteRange byteRange);
 
     Collection<Long> deleteResourceById(Collection<Long> ids);
 }

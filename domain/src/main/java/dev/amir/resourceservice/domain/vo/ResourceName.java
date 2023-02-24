@@ -2,12 +2,10 @@ package dev.amir.resourceservice.domain.vo;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
-@Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResourceName {
@@ -19,6 +17,10 @@ public class ResourceName {
 
     public static ResourceName newInstance() {
         return new ResourceName(UUID.randomUUID());
+    }
+
+    public String getValue() {
+        return toString();
     }
 
     @Override

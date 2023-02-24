@@ -8,12 +8,12 @@ import dev.amir.resourceservice.framework.input.rest.request.DeleteResourceReque
 import dev.amir.resourceservice.framework.input.rest.response.CreateResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.DeleteResourceResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +24,9 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public ResponseEntity<CreateResourceResponse> createResource(CreateResourceRequest request) {
         var resource = resourceManagementUseCase.createResource(request.getResourceData());
+        if (Objects.isNull(resource) || Objects.isNull(resource.getId())) {
+            throw new UnexpectedResourceException("Resource is null or does not have a valid Id");
+        }
         return ResponseEntity.ok(new CreateResourceResponse(resource.getId()));
     }
 
@@ -40,7 +43,7 @@ public class ResourceServiceImpl implements ResourceService {
             return ResponseEntity.ok(new DeleteResourceResponse(deletedResourceIds));
         } catch (NumberFormatException exception) {
             throw new UnexpectedResourceException(String.format("Invalid list of ids: [%s]", request.getIds()), exception);
-        } catch (DataAccessException exception) {
+        } catch (Exception exception) {
             throw new UnexpectedResourceException(exception);
         }
     }

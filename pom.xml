@@ -20,14 +20,16 @@
         <spring.boot.version>3.0.2</spring.boot.version>
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
         <spring.retry.version>2.0.0</spring.retry.version>
-        <spock.version>2.4-M1-groovy-4.0</spock.version>
-        <groovy.version>4.0.8</groovy.version>
-        <snakeyaml.version>1.33</snakeyaml.version>
+
         <lombok.version>1.18.24</lombok.version>
-        <mapstruct.version>1.5.3.Final</mapstruct.version>
         <aws.version>1.12.397</aws.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
         <apache.tika.version>2.7.0</apache.tika.version>
         <jakarta.validation.version>3.0.2</jakarta.validation.version>
+
+        <groovy.version>4.0.8</groovy.version>
+        <spock.version>2.4-M1-groovy-4.0</spock.version>
+        <easy-random.version>5.0.0</easy-random.version>
     </properties>
 
     <modules>
@@ -142,11 +144,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>https://repo1.maven.org/maven2</url>
-        </repository>
-    </repositories>
 </project>

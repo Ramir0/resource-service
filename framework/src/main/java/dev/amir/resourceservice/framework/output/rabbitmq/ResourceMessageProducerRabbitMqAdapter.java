@@ -20,6 +20,7 @@ public class ResourceMessageProducerRabbitMqAdapter implements ResourceMessagePr
 
     @Override
     public void sendProcessResourceMessage(Resource resource) {
+        log.info("Sending Resource with Id: [{}] to be processed", resource.getId());
         var message = new ProcessResourceMessage(resource.getId());
         rabbitTemplate.convertAndSend(resourceProcessQueue, message);
         log.info("Message sent: {}", message);

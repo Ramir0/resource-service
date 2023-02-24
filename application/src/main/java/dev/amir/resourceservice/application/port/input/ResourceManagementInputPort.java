@@ -1,14 +1,18 @@
 package dev.amir.resourceservice.application.port.input;
 
-import dev.amir.resourceservice.application.manager.ResourceMessageManager;
 import dev.amir.resourceservice.application.manager.ResourceMetaDataManager;
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort;
+import dev.amir.resourceservice.application.port.output.ResourceMessageProducerOutputPort;
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort;
+import dev.amir.resourceservice.application.retry.RetryExecutor;
 import dev.amir.resourceservice.application.usecase.ResourceManagementUseCase;
 import dev.amir.resourceservice.application.validator.ResourceMetadataValidator;
+import dev.amir.resourceservice.domain.entity.ByteRange;
 import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.domain.exception.InvalidResourceException;
 import dev.amir.resourceservice.domain.exception.ResourceNotFoundException;
+import dev.amir.resourceservice.domain.vo.ContentLength;
+import dev.amir.resourceservice.domain.vo.ContentType;
 import dev.amir.resourceservice.domain.vo.ResourceName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +30,8 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
     private final ResourceMetadataValidator resourceMetadataValidator;
     private final ResourceDataStorageOutputPort resourceDataStorageOutputPort;
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort;
-    private final ResourceMessageManager resourceMessageManager;
+    private final ResourceMessageProducerOutputPort resourceMessageProducerOutputPort;
+    private final RetryExecutor retryExecutor;
 
     @Override
     public Resource createResource(byte[] resourceData) {
@@ -40,13 +45,13 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
             throw new InvalidResourceException("Invalid content length");
         }
 
-        log.info("ResourceData validated with Content-Type: [{}] Content-Length: [{}]", contentType, contentLength);
+        log.info("Creating Resource with Content-Type: [{}] Content-Length: [{}]", contentType, contentLength);
         var newResource = buildResource(contentLength, contentType);
         resourceDataStorageOutputPort.uploadResource(newResource, resourceData);
         var savedResource = resourcePersistenceOutputPort.saveResource(newResource);
-        resourceMessageManager.sendProcessResourceMessage(savedResource);
-        log.info("Resource with Id: [{}] was successfully created", savedResource.getId());
+        retryExecutor.execute(() -> resourceMessageProducerOutputPort.sendProcessResourceMessage(savedResource));
 
+        log.info("Resource with Id: [{}] was successfully created", savedResource.getId());
         return savedResource;
     }
 
@@ -63,9 +68,9 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
     }
 
     @Override
-    public byte[] getPartialResourceData(Resource resource, Long start, Long end) {
-        log.info("Get partial (Start: [{}] End: [{}]) ResourceData of Resource with Id [{}]", start, end, resource.getId());
-        return resourceDataStorageOutputPort.downloadResource(resource, start, end);
+    public byte[] getPartialResourceData(Resource resource, ByteRange byteRange) {
+        log.info("Get partial [{}] ResourceData of Resource with Id [{}]", byteRange, resource.getId());
+        return resourceDataStorageOutputPort.downloadResource(resource, byteRange);
     }
 
     @Override
@@ -83,8 +88,8 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
         return Resource.builder()
                 .name(buildName())
                 .path(buildPath())
-                .contentType(contentType)
-                .contentLength(contentLength)
+                .contentType(new ContentType(contentType))
+                .contentLength(new ContentLength(contentLength))
                 .createdAt(Instant.now())
                 .build();
     }

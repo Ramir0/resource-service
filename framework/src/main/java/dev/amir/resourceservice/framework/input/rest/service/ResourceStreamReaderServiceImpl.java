@@ -14,7 +14,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ResourceStreamReaderServiceImpl implements ResourceStreamReaderService {
-    private final static String CONTENT_RANGE_FORMAT = "bytes %s-%s/%d";
+    private final static String CONTENT_RANGE_FORMAT = "bytes %s-%s/%s";
 
     private final ResourceManagementUseCase resourceManagementUseCase;
     private final ByteRangeConverter byteRangeConverter;
@@ -43,8 +43,7 @@ public class ResourceStreamReaderServiceImpl implements ResourceStreamReaderServ
                 outputStream.write(
                         resourceManagementUseCase.getPartialResourceData(
                                 resource,
-                                byteRange.getStartByte(),
-                                byteRange.getEndByte()
+                                byteRange
                         )
                 )
         );
@@ -52,8 +51,8 @@ public class ResourceStreamReaderServiceImpl implements ResourceStreamReaderServ
 
     private String buildContentRange(Resource resource, ByteRange byteRange) {
         return String.format(CONTENT_RANGE_FORMAT,
-                Objects.toString(byteRange.getStartByte(), ""),
-                Objects.toString(byteRange.getEndByte(), ""),
+                Objects.toString(byteRange.getStart(), ""),
+                Objects.toString(byteRange.getEnd(), ""),
                 resource.getContentLength());
     }
 

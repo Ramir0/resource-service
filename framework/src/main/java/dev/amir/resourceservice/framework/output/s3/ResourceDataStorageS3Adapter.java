@@ -5,8 +5,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort;
+import dev.amir.resourceservice.domain.entity.ByteRange;
 import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.domain.exception.UnexpectedResourceException;
+import dev.amir.resourceservice.domain.vo.ContentLength;
+import dev.amir.resourceservice.domain.vo.ContentType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,10 +56,10 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
     }
 
     @Override
-    public byte[] downloadResource(Resource resource, Long start, Long end) {
+    public byte[] downloadResource(Resource resource, ByteRange byteRange) {
         var objectKey = buildObjectKey(resource);
-        long fixedStart = getFixedStart(resource, start, end);
-        long fixedEnd = getFixedEnd(resource, fixedStart, end);
+        long fixedStart = getFixedStart(resource, byteRange);
+        long fixedEnd = getFixedEnd(resource, fixedStart, byteRange);
         var request = new GetObjectRequest(bucketName, objectKey);
         request.setRange(fixedStart, fixedEnd);
         return downloadResource(request);
@@ -83,18 +86,19 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
         }
     }
 
-    private long getFixedStart(Resource resource, Long start, Long end) {
-        return start == null || start < 0L ?
-                resource.getContentLength() - end :
-                start;
+    private long getFixedStart(Resource resource, ByteRange byteRange) {
+        long length = resource.getContentLength().getValue();
+        return byteRange.getStart() == null || byteRange.getStart() < 0L ?
+                length - byteRange.getEnd() :
+                byteRange.getStart();
     }
 
 
-    private long getFixedEnd(Resource resource, Long start, Long end) {
-        long length = resource.getContentLength();
-        return end == null || end < 0L || end + start > length ?
+    private long getFixedEnd(Resource resource, Long start, ByteRange byteRange) {
+        long length = resource.getContentLength().getValue();
+        return byteRange.getEnd() == null || byteRange.getEnd() < 0L || byteRange.getEnd() + start > length ?
                 length :
-                end + start;
+                byteRange.getEnd() + start;
     }
 
     private byte[] downloadResource(GetObjectRequest request) {
@@ -107,10 +111,10 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
         }
     }
 
-    private ObjectMetadata buildMetadata(String contentType, long contentLength) {
+    private ObjectMetadata buildMetadata(ContentType contentType, ContentLength contentLength) {
         var objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentType(contentType);
-        objectMetadata.setContentLength(contentLength);
+        objectMetadata.setContentType(contentType.getValue());
+        objectMetadata.setContentLength(contentLength.getValue());
         return objectMetadata;
     }
 

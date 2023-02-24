@@ -28,12 +28,12 @@ public class ByteRangeConverterImpl implements ByteRangeConverter {
 
         var byteRange = new ByteRange();
         if (StringUtils.hasText(matcher.group(1))) {
-            byteRange.setStartByte(Long.valueOf(matcher.group(1)));
+            byteRange.setStart(Long.valueOf(matcher.group(1)));
         }
         if (StringUtils.hasText(matcher.group(2))) {
-            byteRange.setEndByte(Long.valueOf(matcher.group(2)));
+            byteRange.setEnd(Long.valueOf(matcher.group(2)));
         }
-        if (byteRange.getEndByte() == null && byteRange.getStartByte() == null) {
+        if (byteRange.getEnd() == null && byteRange.getStart() == null) {
             throw new InvalidResourceException("Range Header must have at least one value");
         }
         return Optional.of(byteRange);
