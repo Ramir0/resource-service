@@ -1,22 +1,21 @@
 package dev.amir.resourceservice.framework.output.sql.configuration;
 
+import dev.amir.resourceservice.domain.profile.Profiles;
 import jakarta.persistence.SharedCacheMode;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.Profile;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
+@Profile("!" + Profiles.TEST)
 @Configuration
-@EnableTransactionManagement
-@EnableJpaRepositories
 public class JpaConfiguration {
 
     @Value("${spring.jpa.packages-to-scan}")
@@ -24,14 +23,14 @@ public class JpaConfiguration {
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
-        var factoryBean = new LocalContainerEntityManagerFactoryBean();
-        factoryBean.setPersistenceUnitName("PersistenceUnit");
-        factoryBean.setDataSource(dataSource);
-        factoryBean.setJpaVendorAdapter(jpaVendorAdapter);
-        factoryBean.setPackagesToScan(packagesToScan);
-        factoryBean.setPersistenceProviderClass(HibernatePersistenceProvider.class);
-        factoryBean.setJpaPropertyMap(jpaProperties());
-        return factoryBean;
+        var entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
+        entityManagerFactory.setPersistenceUnitName("PersistenceUnit");
+        entityManagerFactory.setDataSource(dataSource);
+        entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter);
+        entityManagerFactory.setPackagesToScan(packagesToScan);
+        entityManagerFactory.setPersistenceProviderClass(HibernatePersistenceProvider.class);
+        entityManagerFactory.setJpaPropertyMap(jpaProperties());
+        return entityManagerFactory;
     }
 
     private Map<String, Object> jpaProperties() {

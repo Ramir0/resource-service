@@ -1,15 +1,17 @@
 package dev.amir.resourceservice.framework.output.s3.configuration;
 
+import dev.amir.resourceservice.domain.profile.Profiles;
 import com.amazonaws.services.s3.AmazonS3;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
+
+@Profile("!" + Profiles.TEST)
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "app.test.enabled", havingValue = "false")
 public class S3BucketCreator {
     private final AmazonS3 s3Client;
 

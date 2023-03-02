@@ -15,6 +15,7 @@
 
         <skip.unit.tests>false</skip.unit.tests>
         <skip.integration.tests>true</skip.integration.tests>
+        <skip.component.tests>true</skip.component.tests>
 
         <spring.version>6.0.5</spring.version>
         <spring.boot.version>3.0.2</spring.boot.version>
@@ -69,7 +70,16 @@
         <profile>
             <id>integration-test</id>
             <properties>
+                <skip.component.tests>true</skip.component.tests>
                 <skip.integration.tests>false</skip.integration.tests>
+                <skip.unit.tests>true</skip.unit.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>component-test</id>
+            <properties>
+                <skip.component.tests>false</skip.component.tests>
+                <skip.integration.tests>true</skip.integration.tests>
                 <skip.unit.tests>true</skip.unit.tests>
             </properties>
         </profile>
@@ -138,6 +148,21 @@
                                 <include>**/*IT</include>
                             </includes>
                             <skipTests>${skip.integration.tests}</skipTests>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>component-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                            <useFile>false</useFile>
+                            <includes>
+                                <include>**/*CT</include>
+                            </includes>
+                            <skipTests>${skip.component.tests}</skipTests>
                         </configuration>
                     </execution>
                 </executions>

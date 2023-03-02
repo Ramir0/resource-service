@@ -2,9 +2,13 @@ server:
   port: 8081
 
 spring:
-  devtools:
-    restart:
-      enabled: true
+  profiles:
+    active: dev
+    default: dev
+  data:
+    jpa:
+      repositories:
+        enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5432/resource-db
     username: postgres
@@ -47,7 +51,6 @@ cloud:
       secretKey: local-dev-secret-key
     s3:
       bucket: resource-bucket
+      endpoint: http://localhost:4566/
     region:
       static: us-east-1
-    endpoint:
-      s3: http://localhost:4566/
