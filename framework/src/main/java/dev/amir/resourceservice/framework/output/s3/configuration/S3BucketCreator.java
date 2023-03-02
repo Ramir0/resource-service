@@ -4,10 +4,12 @@ import com.amazonaws.services.s3.AmazonS3;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Configuration
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.test.enabled", havingValue = "false")
 public class S3BucketCreator {
     private final AmazonS3 s3Client;
 

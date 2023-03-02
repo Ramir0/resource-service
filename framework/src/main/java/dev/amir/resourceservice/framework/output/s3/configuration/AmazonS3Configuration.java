@@ -24,7 +24,7 @@ public class AmazonS3Configuration {
     private String region;
 
     @Bean
-    AmazonS3 getS3Client() {
+    AmazonS3 s3Client() {
         return AmazonS3ClientBuilder
                 .standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))

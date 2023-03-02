@@ -14,7 +14,7 @@ class ResourceServiceSpec extends Specification {
 
     def "createResource should return a ResponseEntity with code 200"() {
         given:
-        byte[] resourceData = [1, 2, 3, 4, 5]
+        byte[] resourceData = [1, 2, 3]
         def request = new CreateResourceRequest(resourceData)
 
         when:
@@ -24,13 +24,13 @@ class ResourceServiceSpec extends Specification {
         1 * resourceManagementUseCase.createResource(resourceData) >> Resource.builder().id(1).build()
 
         and:
-        response.getStatusCode() == HttpStatus.OK
+        response.statusCode == HttpStatus.OK
         response.hasBody()
     }
 
     def "createResource should throw an UnexpectedResourceException when creation fails"() {
         given:
-        byte[] resourceData = [1, 2, 3, 4, 5]
+        byte[] resourceData = [1, 2, 3]
         def request = new CreateResourceRequest(resourceData)
 
         when:
@@ -40,7 +40,8 @@ class ResourceServiceSpec extends Specification {
         1 * resourceManagementUseCase.createResource(resourceData) >> null
 
         and:
-        thrown(UnexpectedResourceException)
+        def exception = thrown(UnexpectedResourceException)
+        exception.message == "Resource is null or does not have a valid Id"
     }
 
     def "getResourceById should return a Resource"() {
@@ -69,9 +70,9 @@ class ResourceServiceSpec extends Specification {
         1 * resourceManagementUseCase.deleteResourceById(_) >> [1]
 
         and:
-        response.getStatusCode() == HttpStatus.OK
+        response.statusCode == HttpStatus.OK
         response.hasBody()
-        response.getBody().getIds().size() == 1
+        response.body.ids.size() == 1
     }
 
     def "deleteResource should throw UnexpectedResourceException when deletion fails"() {
@@ -87,7 +88,7 @@ class ResourceServiceSpec extends Specification {
 
         and:
         def exception = thrown(UnexpectedResourceException)
-        exception.getMessage() == "java.lang.NullPointerException: test"
+        exception.message == "java.lang.NullPointerException: test"
     }
 
     def "deleteResource should throw UnexpectedResourceException when parsing Ids fails"() {
@@ -103,6 +104,6 @@ class ResourceServiceSpec extends Specification {
 
         and:
         def exception = thrown(UnexpectedResourceException)
-        exception.getMessage() == "Invalid list of ids: [1]"
+        exception.message == "Invalid list of ids: [1]"
     }
 }
