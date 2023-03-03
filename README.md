@@ -5,7 +5,7 @@ This project is a Spring Boot application that provides resources.
 ## Running Project
 ### First time execution
 - `docker-compose up -d`
-- `mvn clean -U install`
+- `mvn clean install`
 ### Running Spring Boot
 - `mvn spring-boot:run -f bootstrap/pom.xml`
 

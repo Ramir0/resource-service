@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
         log.error(errorMessage, exception);
-        return new ResponseEntity<>("An internal server error has occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        return getInternalServerErrorResponse();
     }
 
     @ExceptionHandler({InvalidResourceException.class})
@@ -39,6 +39,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({Exception.class})
     public ResponseEntity<String> handleException(Exception exception) {
         log.error(exception.getMessage(), exception);
+        return getInternalServerErrorResponse();
+    }
+
+    private ResponseEntity<String> getInternalServerErrorResponse() {
         return new ResponseEntity<>("An internal server error has occurred", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
