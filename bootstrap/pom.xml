@@ -115,6 +115,7 @@
                 <configuration>
                     <baseClassForTests>dev.amir.resourceservice.contracts.BaseContract</baseClassForTests>
                     <testFramework>SPOCK</testFramework>
+                    <skip>${skip.contract.tests}</skip>
                 </configuration>
             </plugin>
         </plugins>
