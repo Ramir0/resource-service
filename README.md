@@ -1,18 +1,28 @@
-# Getting Started
+# Resource Service
 
-### Reference Documentation
-For further reference, please consider the following sections:
+This project is a Spring Boot application that provides resources.
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.0.2/maven-plugin/reference/html/#build-image)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/3.0.2/reference/htmlsingle/#web)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/docs/3.0.2/reference/htmlsingle/#using.devtools)
+## Running Project
+### First time execution
+- `docker-compose up -d`
+- `mvn clean -U install`
+### Running Spring Boot
+- `mvn spring-boot:run -f bootstrap/pom.xml`
 
-### Guides
-The following guides illustrate how to use some features concretely:
+## Running Tests
 
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+To run the unit tests:
+`mvn clean test`
 
+To run the integration tests:
+`mvn clean test -Pintegration-test`
+
+To run the component tests:
+`mvn clean test -Pcomponent-test`
+
+To run the contract tests:
+`mvn clean test -Pcontract-test`
+
+## Cleaning Project
+- `docker-compose down --volumes`
+- `mvn clean -U`
