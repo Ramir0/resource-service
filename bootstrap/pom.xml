@@ -60,6 +60,19 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-contract-verifier</artifactId>
+            <version>${spring.cloud.contract.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>spring-mock-mvc</artifactId>
+            <version>5.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-spring</artifactId>
             <version>${spock.version}</version>
@@ -92,6 +105,16 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-contract-maven-plugin</artifactId>
+                <version>${spring.cloud.contract.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <baseClassForTests>dev.amir.resourceservice.contracts.BaseContract</baseClassForTests>
+                    <testFramework>SPOCK</testFramework>
                 </configuration>
             </plugin>
         </plugins>

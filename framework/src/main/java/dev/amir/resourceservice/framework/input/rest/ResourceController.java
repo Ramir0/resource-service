@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("resources")
-public class ResourcesController {
+public class ResourceController {
     private final ResourceService resourceService;
     private final ResourceStreamReaderService resourceStreamReaderService;
 

@@ -1,0 +1,11 @@
+description: Should return the new Resource Id
+
+request:
+  method: POST
+  url: /resources
+  bodyFromFileAsBytes: valid.mp3
+
+response:
+  status: 200
+  body:
+    id: 1

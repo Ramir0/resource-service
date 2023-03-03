@@ -1,6 +1,5 @@
 package dev.amir.resourceservice.ct.resource
 
-
 import com.amazonaws.services.s3.model.PutObjectResult
 import dev.amir.resourceservice.ct.BaseCT
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +16,7 @@ class ResourceControllerCT extends BaseCT {
     @Autowired
     private MockMvc mockMvc
 
-    def "Create a Resource from a valid content type should return HTTP StatusCode OK"() {
+    def "Create a Resource from a valid content type should return HTTP Status OK"() {
         given:
         def fileName = "Nature.mp3"
         byte[] resourceData = Files.readAllBytes(Paths.get(BASE_FILES_PATH, fileName))

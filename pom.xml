@@ -16,10 +16,12 @@
         <skip.unit.tests>false</skip.unit.tests>
         <skip.integration.tests>true</skip.integration.tests>
         <skip.component.tests>true</skip.component.tests>
+        <skip.contract.tests>true</skip.contract.tests>
 
         <spring.version>6.0.5</spring.version>
         <spring.boot.version>3.0.2</spring.boot.version>
         <spring.cloud.version>2.2.6.RELEASE</spring.cloud.version>
+        <spring.cloud.contract.version>4.0.1</spring.cloud.contract.version>
         <spring.retry.version>2.0.0</spring.retry.version>
 
         <lombok.version>1.18.24</lombok.version>
@@ -70,6 +72,7 @@
         <profile>
             <id>integration-test</id>
             <properties>
+                <skip.contract.tests>true</skip.contract.tests>
                 <skip.component.tests>true</skip.component.tests>
                 <skip.integration.tests>false</skip.integration.tests>
                 <skip.unit.tests>true</skip.unit.tests>
@@ -78,7 +81,17 @@
         <profile>
             <id>component-test</id>
             <properties>
+                <skip.contract.tests>true</skip.contract.tests>
                 <skip.component.tests>false</skip.component.tests>
+                <skip.integration.tests>true</skip.integration.tests>
+                <skip.unit.tests>true</skip.unit.tests>
+            </properties>
+        </profile>
+        <profile>
+            <id>contract-test</id>
+            <properties>
+                <skip.contract.tests>false</skip.contract.tests>
+                <skip.component.tests>true</skip.component.tests>
                 <skip.integration.tests>true</skip.integration.tests>
                 <skip.unit.tests>true</skip.unit.tests>
             </properties>
@@ -113,33 +126,53 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <testSources>
+                        <testSource>
+                            <directory>${project.basedir}/src/test/groovy</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                        <testSource>
+                            <directory>
+                                ${project.build.directory}/generated-test-sources/contracts
+                            </directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                    </testSources>
+                </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M8</version>
-                <configuration>
-                    <useModulePath>false</useModulePath>
-                    <useFile>false</useFile>
-                    <includes>
-                        <include>**/*Test</include>
-                        <include>**/*Spec</include>
-                    </includes>
-                    <skipTests>${skip.unit.tests}</skipTests>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M8</version>
                 <executions>
+                    <execution>
+                        <id>unit-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                            <useFile>false</useFile>
+                            <includes>
+                                <include>**/*Test</include>
+                                <include>**/*Spec</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*ContractVerifierSpec</exclude>
+                            </excludes>
+                            <skipTests>${skip.unit.tests}</skipTests>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>integration-test</id>
                         <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
+                            <goal>test</goal>
                         </goals>
                         <configuration>
                             <useModulePath>false</useModulePath>
@@ -153,8 +186,7 @@
                     <execution>
                         <id>component-test</id>
                         <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
+                            <goal>test</goal>
                         </goals>
                         <configuration>
                             <useModulePath>false</useModulePath>
@@ -163,6 +195,20 @@
                                 <include>**/*CT</include>
                             </includes>
                             <skipTests>${skip.component.tests}</skipTests>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>contract-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                            <useFile>false</useFile>
+                            <includes>
+                                <include>**/*ContractVerifierSpec</include>
+                            </includes>
+                            <skipTests>${skip.contract.tests}</skipTests>
                         </configuration>
                     </execution>
                 </executions>

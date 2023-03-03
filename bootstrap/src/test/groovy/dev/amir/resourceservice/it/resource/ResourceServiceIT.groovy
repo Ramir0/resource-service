@@ -19,7 +19,7 @@ class ResourceServiceIT extends BaseIT {
     @Autowired
     private ResourceService resourceService
 
-    def "Create a Resource from a valid content type should return HTTP StatusCode OK"() {
+    def "Create a Resource from a valid content type should return HTTP Status OK"() {
         given:
         def fileName = "Nature.mp3"
         byte[] resourceData = Files.readAllBytes(Paths.get(BASE_FILES_PATH, fileName))
