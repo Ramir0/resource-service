@@ -13,25 +13,28 @@ Please make sure that all of these dependencies are installed and configured cor
 
 ## Running Project
 ### First time execution
+- `docker network create resource-network`
 - `docker-compose up -d`
 - `mvn clean install`
-### Running Spring Boot
+### Running from Maven
 - `mvn spring-boot:run -f bootstrap/pom.xml`
+### Running from Dockerfile
+- `docker build --no-cache -t resource-service:latest .`
+- `docker run -d --env-file .env --name resource-service-container -p 8081:8081 --network resource-network resource-service`
 
 ## Running Tests
 
-To run the unit tests:
-`mvn clean test`
+`mvn clean test` - To run the unit tests
 
-To run the integration tests:
-`mvn clean test -Pintegration-test`
+`mvn clean test -Pintegration-test` - To run the integration tests
 
-To run the component tests:
-`mvn clean test -Pcomponent-test`
+`mvn clean test -Pcomponent-test` - To run the component tests
 
-To run the contract tests:
-`mvn clean test -Pcontract-test`
+`mvn clean test -Pcontract-test` - To run the contract tests
 
-## Cleaning Project
-- `docker-compose down --volumes`
-- `mvn clean -U`
+## Cleaning Project and Resources
+`mvn clean -U` - Clean project files generated and update dependencies
+
+`docker-compose down --volumes` - Delete all services related to the project
+
+`docker network rm resource-network` - Delete docker network

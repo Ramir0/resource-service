@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/resource-db
+    username: postgres
+    password: postgres
+  rabbitmq:
+    host: localhost
+    username: guest
+    password: guest
+
+cloud:
+  aws:
+    stack:
+      auto: false
+    credentials:
+      instanceProfile: false
+      accessKey: local-dev-access-key
+      secretKey: local-dev-secret-key
+    s3:
+      bucket: resource-bucket
+      endpoint: http://localhost:4566/
+    region:
+      static: us-east-1

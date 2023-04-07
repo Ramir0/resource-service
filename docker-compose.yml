@@ -1,33 +1,41 @@
 version: '3.8'
 
 services:
-  db:
+  resource-db:
     image: postgres:15.1-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: resource-db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - '5432:5432'
     volumes:
       - resource-db-data:/var/lib/postgresql/data
-  localstack:
+    networks:
+      - resource-network
+  resource-localstack:
     image: localstack/localstack:1.4
     environment:
       - SERVICES=s3
       - EAGER_SERVICE_LOADING=1
-      - ACCESS_KEY=local-dev-access-key
-      - SECRET_KEY=local-dev-secret-key
+      - ACCESS_KEY=${AWS_ACCESS_KEY}
+      - SECRET_KEY=${AWS_SECRET_KEY}
       - PERSISTENCE=1
-      - AWS_REGION=us-east-1
+      - AWS_REGION=${AWS_DEFAULT_REGION}
     ports:
       - "4571:4571"
       - "4572:4572"
       - "4566:4566"
     volumes:
       - "resource-s3-data:/tmp/localstack/data"
+    networks:
+      - resource-network
 volumes:
   resource-db-data:
     driver: local
   resource-s3-data:
     driver: local
+networks:
+  resource-network:
+    external:
+      name: resource-network

@@ -3,16 +3,15 @@ server:
 
 spring:
   profiles:
-    active: dev
     default: dev
   data:
     jpa:
       repositories:
         enabled: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/resource-db
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://resource-db:5432/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     packages-to-scan: dev.amir.resourceservice.framework.output.sql.entity
@@ -34,10 +33,10 @@ spring:
     multiplier: 2
     max-interval: 30000
   rabbitmq:
-    host: localhost
+    host: resource-rabbitmq
     port: 5672
-    username: guest
-    password: guest
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
     queues:
       resource-process: q.resource-process
 
@@ -47,10 +46,10 @@ cloud:
       auto: false
     credentials:
       instanceProfile: false
-      accessKey: local-dev-access-key
-      secretKey: local-dev-secret-key
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_KEY}
     s3:
       bucket: resource-bucket
-      endpoint: http://localhost:4566/
+      endpoint: http://resource-localstack:4566/
     region:
-      static: us-east-1
+      static: ${AWS_DEFAULT_REGION}
