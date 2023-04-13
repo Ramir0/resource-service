@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:configserver:http://localhost:8090/
   datasource:
     url: jdbc:postgresql://localhost:5432/resource-db
     username: postgres
