@@ -2,22 +2,27 @@ package dev.amir.resourceservice.ct
 
 import dev.amir.resourceservice.App
 import dev.amir.resourceservice.domain.profile.Profiles
+import org.spockframework.spring.SpringBean
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.web.client.RestTemplate
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 
-@ActiveProfiles(Profiles.DEV)
+@ActiveProfiles(Profiles.INTEGRATION)
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest(classes = [App], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BaseCT extends Specification {
+    @SpringBean
+    protected RestTemplate restTemplate = Mock(RestTemplate)
+
     // Amazon S3 env
     private static final Integer[] S3_PORTS = [4566, 4571, 4572]
     private static final String S3_ACCESS_KEY = "local-test-access-key"
@@ -55,7 +60,7 @@ class BaseCT extends Specification {
         registry.add("spring.rabbitmq.port", rabbitMQContainer::getFirstMappedPort)
 
         // Amazon S3 props
-        registry.add("cloud.aws.s3.endpoint", () -> "http://" + s3Container.getHost() + ":" + s3Container.getFirstMappedPort())
+        registry.add("services.aws.s3.url", () -> "http://" + s3Container.getHost() + ":" + s3Container.getFirstMappedPort())
         registry.add("cloud.aws.region.static", () -> S3_REGION)
         registry.add("cloud.aws.credentials.accessKey", () -> S3_ACCESS_KEY)
         registry.add("cloud.aws.credentials.secretKey", () -> S3_SECRET_KEY)

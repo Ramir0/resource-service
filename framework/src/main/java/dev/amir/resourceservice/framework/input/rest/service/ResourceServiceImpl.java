@@ -3,8 +3,10 @@ package dev.amir.resourceservice.framework.input.rest.service;
 import dev.amir.resourceservice.application.usecase.ResourceManagementUseCase;
 import dev.amir.resourceservice.domain.entity.Resource;
 import dev.amir.resourceservice.domain.exception.UnexpectedResourceException;
+import dev.amir.resourceservice.framework.input.rest.request.CompleteResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.request.CreateResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.request.DeleteResourceRequest;
+import dev.amir.resourceservice.framework.input.rest.response.CompleteResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.CreateResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.DeleteResourceResponse;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,16 @@ public class ResourceServiceImpl implements ResourceService {
             return ResponseEntity.ok(new DeleteResourceResponse(deletedResourceIds));
         } catch (NumberFormatException exception) {
             throw new UnexpectedResourceException(String.format("Invalid list of ids: [%s]", request.getIds()), exception);
+        } catch (Exception exception) {
+            throw new UnexpectedResourceException(exception);
+        }
+    }
+
+    @Override
+    public ResponseEntity<CompleteResourceResponse> completeResource(CompleteResourceRequest request) {
+        try {
+            var resource = resourceManagementUseCase.completeResourceById(request.getId());
+            return ResponseEntity.ok(new CompleteResourceResponse(resource.getStatus()));
         } catch (Exception exception) {
             throw new UnexpectedResourceException(exception);
         }

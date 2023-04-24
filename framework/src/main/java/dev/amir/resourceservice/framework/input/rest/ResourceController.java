@@ -1,8 +1,10 @@
 package dev.amir.resourceservice.framework.input.rest;
 
+import dev.amir.resourceservice.framework.input.rest.request.CompleteResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.request.CreateResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.request.DeleteResourceRequest;
 import dev.amir.resourceservice.framework.input.rest.request.GetResourceRequest;
+import dev.amir.resourceservice.framework.input.rest.response.CompleteResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.CreateResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.DeleteResourceResponse;
 import dev.amir.resourceservice.framework.input.rest.response.GetResourceResponse;
@@ -39,6 +41,12 @@ public class ResourceController {
         var request = new GetResourceRequest(resourceId, rangeHeader);
         log.info("Request: {}", request);
         return resourceStreamReaderService.getResource(request);
+    }
+
+    @PostMapping("{id}/complete")
+    public ResponseEntity<CompleteResourceResponse> completeResource(CompleteResourceRequest request) {
+        log.info("Request: {}", request);
+        return resourceService.completeResource(request);
     }
 
     @DeleteMapping()

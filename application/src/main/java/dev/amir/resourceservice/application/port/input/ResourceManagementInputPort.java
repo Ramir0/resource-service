@@ -1,10 +1,10 @@
 package dev.amir.resourceservice.application.port.input;
 
 import dev.amir.resourceservice.application.manager.ResourceMetaDataManager;
-import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort;
 import dev.amir.resourceservice.application.port.output.ResourceMessageProducerOutputPort;
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort;
 import dev.amir.resourceservice.application.retry.RetryExecutor;
+import dev.amir.resourceservice.application.service.ResourceDataStorageService;
 import dev.amir.resourceservice.application.usecase.ResourceManagementUseCase;
 import dev.amir.resourceservice.application.validator.ResourceMetadataValidator;
 import dev.amir.resourceservice.domain.entity.ByteRange;
@@ -14,6 +14,7 @@ import dev.amir.resourceservice.domain.exception.ResourceNotFoundException;
 import dev.amir.resourceservice.domain.vo.ContentLength;
 import dev.amir.resourceservice.domain.vo.ContentType;
 import dev.amir.resourceservice.domain.vo.ResourceName;
+import dev.amir.resourceservice.domain.vo.ResourceStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ import java.util.Collection;
 public class ResourceManagementInputPort implements ResourceManagementUseCase {
     private final ResourceMetaDataManager resourceMetaDataManager;
     private final ResourceMetadataValidator resourceMetadataValidator;
-    private final ResourceDataStorageOutputPort resourceDataStorageOutputPort;
+    private final ResourceDataStorageService resourceDataStorageService;
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort;
     private final ResourceMessageProducerOutputPort resourceMessageProducerOutputPort;
     private final RetryExecutor retryExecutor;
@@ -47,7 +48,7 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
 
         log.info("Creating Resource with Content-Type: [{}] Content-Length: [{}]", contentType, contentLength);
         var newResource = buildResource(contentLength, contentType);
-        resourceDataStorageOutputPort.uploadResource(newResource, resourceData);
+        resourceDataStorageService.uploadResource(newResource, resourceData);
         var savedResource = resourcePersistenceOutputPort.saveResource(newResource);
         retryExecutor.execute(() -> resourceMessageProducerOutputPort.sendProcessResourceMessage(savedResource));
 
@@ -64,13 +65,13 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
     @Override
     public byte[] getResourceData(Resource resource) {
         log.info("Get ResourceData of Resource with Id [{}]", resource.getId());
-        return resourceDataStorageOutputPort.downloadResource(resource);
+        return resourceDataStorageService.downloadResource(resource);
     }
 
     @Override
     public byte[] getPartialResourceData(Resource resource, ByteRange byteRange) {
         log.info("Get partial [{}] ResourceData of Resource with Id [{}]", byteRange, resource.getId());
-        return resourceDataStorageOutputPort.downloadResource(resource, byteRange);
+        return resourceDataStorageService.downloadResource(resource, byteRange);
     }
 
     @Override
@@ -78,10 +79,24 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
         var existingResources = resourcePersistenceOutputPort.getAllResourceById(ids);
         var existingResourcesIds = existingResources.stream().map(Resource::getId).toList();
 
-        resourceDataStorageOutputPort.deleteResources(existingResources);
+        resourceDataStorageService.deleteResources(existingResources);
         resourcePersistenceOutputPort.deleteResourceById(existingResourcesIds);
 
         return existingResourcesIds;
+    }
+
+    @Override
+    public Resource completeResourceById(Long resourceId) {
+        var resource = resourcePersistenceOutputPort.getResourceById(resourceId)
+                .filter(r -> r.getStatus() == ResourceStatus.STAGING)
+                .orElseThrow(
+                        () -> new InvalidResourceException("No resource found with id: " + resourceId + " or resource is not processing")
+                );
+        resourceDataStorageService.moveResource(resource);
+        resource.setStatus(ResourceStatus.COMPLETED);
+        resourcePersistenceOutputPort.saveResource(resource);
+
+        return resource;
     }
 
     private Resource buildResource(long contentLength, String contentType) {
@@ -90,6 +105,7 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
                 .path(buildPath())
                 .contentType(new ContentType(contentType))
                 .contentLength(new ContentLength(contentLength))
+                .status(ResourceStatus.STAGING)
                 .createdAt(Instant.now())
                 .build();
     }

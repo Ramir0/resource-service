@@ -6,9 +6,13 @@ import dev.amir.resourceservice.domain.exception.InvalidResourceException
 import dev.amir.resourceservice.framework.input.rest.request.CreateResourceRequest
 import dev.amir.resourceservice.framework.input.rest.service.ResourceService
 import dev.amir.resourceservice.framework.output.rabbitmq.message.ProcessResourceMessage
+import dev.amir.resourceservice.framework.output.rest.response.GetStorageResponse
 import dev.amir.resourceservice.framework.output.sql.entity.ResourceJpaEntity
 import dev.amir.resourceservice.it.BaseIT
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -26,6 +30,10 @@ class ResourceServiceIT extends BaseIT {
         def createResourceRequest = new CreateResourceRequest(resourceData)
 
         and:
+        def responseEntity = ResponseEntity.ok().body([
+                new GetStorageResponse(1L, "STAGING", "bucket-name", "custom/path/resource"),
+                new GetStorageResponse(2L, "PERMANENT", "bucket-name", "custom/path/resource")
+        ])
         def putResult = new PutObjectResult()
         putResult.ETag = "ETag"
         def savedResource = new ResourceJpaEntity()
@@ -37,6 +45,7 @@ class ResourceServiceIT extends BaseIT {
         def response = resourceService.createResource(createResourceRequest)
 
         then:
+        1 * restTemplate.exchange(_ as String, _ as HttpMethod, null, _ as ParameterizedTypeReference) >> responseEntity
         1 * s3Client.putObject(_ as String, _ as String, _ as InputStream, _ as ObjectMetadata) >> putResult
         1 * resourceRepository.save(_ as ResourceJpaEntity) >> savedResource
         1 * rabbitTemplate.convertAndSend(_ as String, _ as ProcessResourceMessage)

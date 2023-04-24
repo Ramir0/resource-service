@@ -1,5 +1,6 @@
 package dev.amir.resourceservice.framework.output.sql.entity;
 
+import dev.amir.resourceservice.domain.vo.ResourceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +29,9 @@ public class ResourceJpaEntity {
 
     @Column
     private Long contentLength;
+
+    @Column
+    private ResourceStatus status;
 
     @Column
     private Instant createdAt;

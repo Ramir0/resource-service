@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.web.client.RestTemplate
 import spock.lang.Specification
 
 @EnableAutoConfiguration(exclude = [DataSourceAutoConfiguration])
@@ -19,4 +20,6 @@ class BaseIT extends Specification {
     protected RabbitTemplate rabbitTemplate = Mock(RabbitTemplate)
     @SpringBean
     protected ResourceRepository resourceRepository = Mock(ResourceRepository)
+    @SpringBean
+    protected RestTemplate restTemplate = Mock(RestTemplate)
 }

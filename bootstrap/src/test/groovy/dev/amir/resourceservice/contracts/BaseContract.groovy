@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectResult
 import dev.amir.resourceservice.App
 import dev.amir.resourceservice.framework.output.rabbitmq.message.ProcessResourceMessage
+import dev.amir.resourceservice.framework.output.rest.response.GetStorageResponse
 import dev.amir.resourceservice.framework.output.sql.entity.ResourceJpaEntity
 import dev.amir.resourceservice.framework.output.sql.repository.ResourceRepository
 import io.restassured.module.mockmvc.RestAssuredMockMvc
@@ -14,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.context.WebApplicationContext
 import spock.lang.Specification
 
@@ -30,6 +35,8 @@ abstract class BaseContract extends Specification {
     protected RabbitTemplate rabbitTemplate = Mock(RabbitTemplate)
     @SpringBean
     protected ResourceRepository resourceRepository = Mock(ResourceRepository)
+    @SpringBean
+    protected RestTemplate restTemplate = Mock(RestTemplate)
 
     def setup() {
         RestAssuredMockMvc.webAppContextSetup(webApplicationContext)
@@ -37,6 +44,13 @@ abstract class BaseContract extends Specification {
     }
 
     private void initializeMocks() {
+        // Retrieve Storage Information
+        def responseEntity = ResponseEntity.ok().body([
+                new GetStorageResponse(1L, "STAGING", "bucket-name", "custom/path/resource"),
+                new GetStorageResponse(2L, "PERMANENT", "bucket-name", "custom/path/resource")
+        ])
+        restTemplate.exchange(_ as String, _ as HttpMethod, null, _ as ParameterizedTypeReference) >> responseEntity
+
         // Upload file to Amazon S3
         def putResult = new PutObjectResult()
         putResult.ETag = "ETag"

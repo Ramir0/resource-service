@@ -1,6 +1,5 @@
 server:
   port: 8081
-
 spring:
   application:
     name: resource-service
@@ -51,8 +50,14 @@ cloud:
       instanceProfile: false
       accessKey: ${AWS_ACCESS_KEY}
       secretKey: ${AWS_SECRET_KEY}
-    s3:
-      bucket: resource-bucket
-      endpoint: http://${AWS_HOSTNAME}:4566/
     region:
       static: ${AWS_DEFAULT_REGION}
+services:
+  aws:
+    s3:
+      url: ${AWS_S3_DOMAIN}
+  storage-service:
+    url: http://${STORAGE_SERVICE_DOMAIN}
+    type:
+      temporal: STAGING
+      permanent: PERMANENT

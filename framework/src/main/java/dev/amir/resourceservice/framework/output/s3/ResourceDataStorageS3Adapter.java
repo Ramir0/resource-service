@@ -4,6 +4,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
+import dev.amir.resourceservice.application.dto.StorageInformation;
 import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort;
 import dev.amir.resourceservice.domain.entity.ByteRange;
 import dev.amir.resourceservice.domain.entity.Resource;
@@ -12,7 +13,6 @@ import dev.amir.resourceservice.domain.vo.ContentLength;
 import dev.amir.resourceservice.domain.vo.ContentType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -26,19 +26,18 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPort {
+    public static final String PATH_DELIMITER = "/";
     private final AmazonS3 s3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucketName;
-
     @Override
-    public void uploadResource(Resource resource, byte[] resourceData) {
+    public void uploadResource(Resource resource, byte[] resourceData, StorageInformation storageInformation) {
         try {
-            var objectKey = buildObjectKey(resource);
+            createBucketIfNotExist(storageInformation);
+            var objectKey = buildObjectKey(resource, storageInformation);
             var inputStream = new ByteArrayInputStream(resourceData);
             var metadata = buildMetadata(resource.getContentType(), resource.getContentLength());
             log.info("Uploading ResourceData with ObjectKey: [{}] to S3", objectKey);
-            var result = s3Client.putObject(bucketName, objectKey, inputStream, metadata);
+            var result = s3Client.putObject(storageInformation.getBucket(), objectKey, inputStream, metadata);
             if (Objects.isNull(result) || !StringUtils.hasText(result.getETag())) {
                 throw new UnexpectedResourceException("Failed Operation: ResourceData was not uploaded to S3");
             }
@@ -49,31 +48,31 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
     }
 
     @Override
-    public byte[] downloadResource(Resource resource) {
-        var objectKey = buildObjectKey(resource);
-        var request = new GetObjectRequest(bucketName, objectKey);
+    public byte[] downloadResource(Resource resource, StorageInformation storageInformation) {
+        var objectKey = buildObjectKey(resource, storageInformation);
+        var request = new GetObjectRequest(storageInformation.getBucket(), objectKey);
         return downloadResource(request);
     }
 
     @Override
-    public byte[] downloadResource(Resource resource, ByteRange byteRange) {
-        var objectKey = buildObjectKey(resource);
+    public byte[] downloadResource(Resource resource, ByteRange byteRange, StorageInformation storageInformation) {
+        var objectKey = buildObjectKey(resource, storageInformation);
         long fixedStart = getFixedStart(resource, byteRange);
         long fixedEnd = getFixedEnd(resource, fixedStart, byteRange);
-        var request = new GetObjectRequest(bucketName, objectKey);
+        var request = new GetObjectRequest(storageInformation.getBucket(), objectKey);
         request.setRange(fixedStart, fixedEnd);
         return downloadResource(request);
     }
 
     @Override
-    public void deleteResources(Collection<Resource> resources) {
+    public void deleteResources(Collection<Resource> resources, StorageInformation storageInformation) {
         if (CollectionUtils.isEmpty(resources)) {
             return;
         }
 
         try {
-            var objectKeys = buildObjectKeys(resources);
-            var deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+            var objectKeys = buildObjectKeys(resources, storageInformation);
+            var deleteObjectsRequest = new DeleteObjectsRequest(storageInformation.getBucket());
             deleteObjectsRequest.withKeys(objectKeys.stream().map(DeleteObjectsRequest.KeyVersion::new).toList());
             var result = s3Client.deleteObjects(deleteObjectsRequest);
             result.getDeletedObjects().stream()
@@ -83,6 +82,25 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
 
         } catch (AmazonClientException | NullPointerException exception) {
             throw new UnexpectedResourceException(exception);
+        }
+    }
+
+    @Override
+    public void moveResource(Resource resource, StorageInformation sourceStorageInfo, StorageInformation destinationStorageInfo) {
+        try {
+            var sourceKey = buildObjectKey(resource, sourceStorageInfo);
+            var destinationKey = buildObjectKey(resource, destinationStorageInfo);
+            createBucketIfNotExist(destinationStorageInfo);
+            s3Client.copyObject(sourceStorageInfo.getBucket(), sourceKey, destinationStorageInfo.getBucket(), destinationKey);
+            s3Client.deleteObject(sourceStorageInfo.getBucket(), sourceKey);
+        } catch (AmazonClientException | NullPointerException exception) {
+            throw new UnexpectedResourceException(exception);
+        }
+    }
+
+    public void createBucketIfNotExist(StorageInformation storageInformation) {
+        if (!s3Client.doesBucketExistV2(storageInformation.getBucket())) {
+            s3Client.createBucket(storageInformation.getBucket());
         }
     }
 
@@ -118,11 +136,16 @@ public class ResourceDataStorageS3Adapter implements ResourceDataStorageOutputPo
         return objectMetadata;
     }
 
-    String buildObjectKey(Resource resource) {
-        return resource.getPath() + "/" + resource.getName();
+    String buildObjectKey(Resource resource, StorageInformation storageInformation) {
+        return String.join(
+                PATH_DELIMITER,
+                storageInformation.getPath(),
+                resource.getPath(),
+                resource.getName().getValue()
+        );
     }
 
-    private List<String> buildObjectKeys(Collection<Resource> resources) {
-        return resources.stream().map(this::buildObjectKey).toList();
+    private List<String> buildObjectKeys(Collection<Resource> resources, StorageInformation storageInformation) {
+        return resources.stream().map(resource -> buildObjectKey(resource, storageInformation)).toList();
     }
 }

@@ -20,8 +20,8 @@ public class AmazonS3Configuration {
     @Value("${cloud.aws.credentials.secretKey}")
     private String secretKey;
 
-    @Value("${cloud.aws.s3.endpoint}")
-    private String endpoint;
+    @Value("${services.aws.s3.url}")
+    private String s3Url;
 
     @Value("${cloud.aws.region.static}")
     private String region;
@@ -30,7 +30,7 @@ public class AmazonS3Configuration {
     AmazonS3 s3Client() {
         return AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(s3Url, region))
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
                 .withPathStyleAccessEnabled(true)
                 .build();

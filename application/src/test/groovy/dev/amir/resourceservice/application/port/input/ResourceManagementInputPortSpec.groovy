@@ -1,12 +1,11 @@
 package dev.amir.resourceservice.application.port.input
 
-
 import dev.amir.resourceservice.application.manager.ResourceMetaDataManager
-import dev.amir.resourceservice.application.port.output.ResourceDataStorageOutputPort
 import dev.amir.resourceservice.application.port.output.ResourceMessageProducerOutputPort
 import dev.amir.resourceservice.application.port.output.ResourcePersistenceOutputPort
 import dev.amir.resourceservice.application.retry.RetryAction
 import dev.amir.resourceservice.application.retry.RetryExecutor
+import dev.amir.resourceservice.application.service.ResourceDataStorageService
 import dev.amir.resourceservice.application.validator.ResourceMetadataValidator
 import dev.amir.resourceservice.domain.entity.Resource
 import dev.amir.resourceservice.domain.exception.InvalidResourceException
@@ -16,7 +15,7 @@ import java.time.Instant
 
 class ResourceManagementInputPortSpec extends Specification {
     private final ResourceMetaDataManager resourceMetaDataManager = Mock()
-    private final ResourceDataStorageOutputPort resourceDataStorageOutputPort = Mock()
+    private final ResourceDataStorageService resourceDataStorageService = Mock()
     private final ResourcePersistenceOutputPort resourcePersistenceOutputPort = Mock()
     private final ResourceMetadataValidator resourceMetadataValidator = Mock()
     private final ResourceMessageProducerOutputPort resourceMessageProducerOutputPort = Mock()
@@ -25,7 +24,7 @@ class ResourceManagementInputPortSpec extends Specification {
     private final ResourceManagementInputPort resourceManagementInputPort = new ResourceManagementInputPort(
             resourceMetaDataManager,
             resourceMetadataValidator,
-            resourceDataStorageOutputPort,
+            resourceDataStorageService,
             resourcePersistenceOutputPort,
             resourceMessageProducerOutputPort,
             retryExecutor
@@ -47,7 +46,7 @@ class ResourceManagementInputPortSpec extends Specification {
         1 * resourceMetadataValidator.isContentTypeInvalid(contentType) >> false
         1 * resourceMetaDataManager.getContentLength(resourceData) >> contentLength
         1 * resourceMetadataValidator.isContentLengthInvalid(contentLength) >> false
-        1 * resourceDataStorageOutputPort.uploadResource(_ as Resource, resourceData)
+        1 * resourceDataStorageService.uploadResource(_ as Resource, resourceData)
         1 * resourcePersistenceOutputPort.saveResource(_ as Resource) >> { args -> resource = args.get(0) }
         1 * retryExecutor.execute(_ as RetryAction)
 

@@ -18,8 +18,11 @@ cloud:
       instanceProfile: false
       accessKey: local-dev-access-key
       secretKey: local-dev-secret-key
-    s3:
-      bucket: resource-bucket
-      endpoint: http://localhost:4566/
     region:
       static: us-east-1
+services:
+  aws:
+    s3:
+      url: http://localhost:4566/
+  storage-service:
+    url: http://localhost:8084
