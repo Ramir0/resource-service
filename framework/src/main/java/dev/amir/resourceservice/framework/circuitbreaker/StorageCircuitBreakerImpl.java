@@ -22,17 +22,17 @@ public class StorageCircuitBreakerImpl implements StorageCircuitBreaker {
 
     @PostConstruct
     public void initializeStubStorage() {
-        var temporalStorage = StorageInformation.builder()
-                .id(1L)
-                .storageType(temporalStorageType)
-                .bucket("temporal-bucket")
-                .path("temporal/resource/path")
-                .build();
         var permanentStorage = StorageInformation.builder()
-                .id(2L)
+                .id(1L)
                 .storageType(permanentStorageType)
-                .bucket("permanent-bucket")
-                .path("permanent/resource/path")
+                .bucket("resource-permanent-bucket")
+                .path("resources")
+                .build();
+        var temporalStorage = StorageInformation.builder()
+                .id(2L)
+                .storageType(temporalStorageType)
+                .bucket("resource-staging-bucket")
+                .path("resources")
                 .build();
 
         stubStorageResult = List.of(temporalStorage, permanentStorage);
