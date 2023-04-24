@@ -36,7 +36,7 @@ services:
     s3:
       url: http://localhost:4566/
   storage-service:
-    url: http://localhost:8084
+    url: http://invalid-localhost:8084
     type:
       temporal: STAGING
       permanent: PERMANENT

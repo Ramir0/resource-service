@@ -28,3 +28,6 @@ services:
     type:
       temporal: STAGING
       permanent: PERMANENT
+eureka:
+  client:
+    enabled: false

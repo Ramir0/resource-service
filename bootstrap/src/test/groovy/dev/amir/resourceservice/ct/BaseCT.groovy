@@ -2,13 +2,11 @@ package dev.amir.resourceservice.ct
 
 import dev.amir.resourceservice.App
 import dev.amir.resourceservice.domain.profile.Profiles
-import org.spockframework.spring.SpringBean
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.springframework.web.client.RestTemplate
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.spock.Testcontainers
@@ -20,8 +18,6 @@ import spock.lang.Specification
 @AutoConfigureMockMvc
 @SpringBootTest(classes = [App], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BaseCT extends Specification {
-    @SpringBean
-    protected RestTemplate restTemplate = Mock(RestTemplate)
 
     // Amazon S3 env
     private static final Integer[] S3_PORTS = [4566, 4571, 4572]

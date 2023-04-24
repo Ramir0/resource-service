@@ -52,6 +52,18 @@ cloud:
       secretKey: ${AWS_SECRET_KEY}
     region:
       static: ${AWS_DEFAULT_REGION}
+resilience4j:
+  circuitbreaker:
+    instances:
+      storage-service:
+        registerHealthIndicator: true
+        event-consumer-buffer-size: 10
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
 services:
   aws:
     s3:
