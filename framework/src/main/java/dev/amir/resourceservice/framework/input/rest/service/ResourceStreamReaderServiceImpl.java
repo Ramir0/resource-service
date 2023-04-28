@@ -30,23 +30,18 @@ public class ResourceStreamReaderServiceImpl implements ResourceStreamReaderServ
     private ResponseEntity<GetResourceResponse> getResponse(Long resourceId) {
         var resource = resourceService.getResourceById(resourceId);
         var response = buildResponseTemplate(resource, HttpStatus.OK);
+        var resourceData = resourceManagementUseCase.getResourceData(resource);
 
-        return response.body(outputStream -> outputStream.write(resourceManagementUseCase.getResourceData(resource)));
+        return response.body(outputStream -> outputStream.write(resourceData));
     }
 
     private ResponseEntity<GetResourceResponse> getPartialResponse(Long resourceId, ByteRange byteRange) {
         var resource = resourceService.getResourceById(resourceId);
         var response = buildResponseTemplate(resource, HttpStatus.PARTIAL_CONTENT);
         response.header(HttpHeaders.CONTENT_RANGE, buildContentRange(resource, byteRange));
+        var resourceData = resourceManagementUseCase.getPartialResourceData(resource, byteRange);
 
-        return response.body(outputStream ->
-                outputStream.write(
-                        resourceManagementUseCase.getPartialResourceData(
-                                resource,
-                                byteRange
-                        )
-                )
-        );
+        return response.body(outputStream -> outputStream.write(resourceData));
     }
 
     private String buildContentRange(Resource resource, ByteRange byteRange) {

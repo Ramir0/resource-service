@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Profile("!" + Profiles.TEST)
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class RabbitMqConfiguration {
     @Value("${spring.rabbitmq.queues.resource-process}")
     private String resourceProcessQueue;
@@ -19,6 +19,7 @@ public class RabbitMqConfiguration {
     @Bean
     public RabbitTemplate rabbitTemplate(CachingConnectionFactory cachingConnectionFactory) {
         var rabbitTemplate = new RabbitTemplate(cachingConnectionFactory);
+        rabbitTemplate.setObservationEnabled(true);
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
         return rabbitTemplate;
     }

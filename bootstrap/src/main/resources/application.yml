@@ -64,6 +64,9 @@ resilience4j:
         waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 2
         automaticTransitionFromOpenToHalfOpenEnabled: true
+logging:
+  pattern:
+    level: "%5p [%X{traceId:-},%X{spanId:-}]"
 services:
   aws:
     s3:
