@@ -52,7 +52,7 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
         var savedResource = resourcePersistenceOutputPort.saveResource(newResource);
         retryExecutor.execute(() -> resourceMessageProducerOutputPort.sendProcessResourceMessage(savedResource));
 
-        log.info("Resource with Id: [{}] was successfully created", savedResource.getId());
+        log.info("Resource with Id: [{}] was successfully created with ResourceStatus: {}", savedResource.getId(), savedResource.getStatus());
         return savedResource;
     }
 
