@@ -76,6 +76,24 @@ services:
       - resource-elasticsearch
     networks:
       - resource-network
+  resource-prometheus:
+    image: prom/prometheus:v2.43.0
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./util/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - resource-network
+  grafana:
+    image: grafana/grafana:9.5.1
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+    depends_on:
+      - resource-prometheus
+    networks:
+      - resource-network
 volumes:
   resource-db-data:
     driver: local

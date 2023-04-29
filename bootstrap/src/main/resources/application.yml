@@ -67,6 +67,11 @@ resilience4j:
 logging:
   pattern:
     level: "%5p [%X{traceId:-},%X{spanId:-}]"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 services:
   aws:
     s3:
