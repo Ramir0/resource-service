@@ -70,6 +70,7 @@ services:
     ports:
       - 5601:5601
     environment:
+      SERVER_BASEPATH: /kibana
       ELASTICSEARCH_URL: http://resource-elasticsearch:9200
       ELASTICSEARCH_HOSTS: '["http://resource-elasticsearch:9200"]'
     depends_on:
@@ -89,7 +90,9 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - GF_SERVER_ROOT_URL=http://localhost:8080/grafana
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     depends_on:
       - resource-prometheus
     networks:
