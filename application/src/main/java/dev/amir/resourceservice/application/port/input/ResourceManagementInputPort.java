@@ -93,7 +93,7 @@ public class ResourceManagementInputPort implements ResourceManagementUseCase {
                         () -> new InvalidResourceException("No resource found with id: " + resourceId + " or resource is not processing")
                 );
         resourceDataStorageService.moveResource(resource);
-        resource.setStatus(ResourceStatus.COMPLETED);
+        resource.setStatus(ResourceStatus.PERMANENT);
         resourcePersistenceOutputPort.saveResource(resource);
 
         return resource;

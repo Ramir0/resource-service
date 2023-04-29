@@ -36,14 +36,14 @@ public class ResourceDataStorageServiceImpl implements ResourceDataStorageServic
 
     @Override
     public byte[] downloadResource(Resource resource) {
-        var storageType = ResourceStatus.COMPLETED.equals(resource.getStatus()) ? storageTypePermanent : storageTypeTemporal;
+        var storageType = ResourceStatus.PERMANENT.equals(resource.getStatus()) ? storageTypePermanent : storageTypeTemporal;
         var storageInformation = getStorageInformationByType(getAllStorageInformation(), storageType);
         return resourceDataStorageOutputPort.downloadResource(resource, storageInformation);
     }
 
     @Override
     public byte[] downloadResource(Resource resource, ByteRange byteRange) {
-        var storageType = ResourceStatus.COMPLETED.equals(resource.getStatus()) ? storageTypePermanent : storageTypeTemporal;
+        var storageType = ResourceStatus.PERMANENT.equals(resource.getStatus()) ? storageTypePermanent : storageTypeTemporal;
         var storageInformation = getStorageInformationByType(getAllStorageInformation(), storageType);
         return resourceDataStorageOutputPort.downloadResource(resource, byteRange, storageInformation);
     }

@@ -24,15 +24,15 @@ public class ResourceJpaEntity {
     @Column
     private String path;
 
-    @Column
+    @Column(name = "content_type")
     private String contentType;
 
-    @Column
+    @Column(name = "content_length")
     private Long contentLength;
 
     @Column
     private ResourceStatus status;
 
-    @Column
+    @Column(name = "created_at")
     private Instant createdAt;
 }
