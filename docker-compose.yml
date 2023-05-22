@@ -30,76 +30,10 @@ services:
       - "resource-s3-data:/tmp/localstack/data"
     networks:
       - resource-network
-  resource-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.0
-    environment:
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "xpack.security.enabled=false"
-      - "discovery.type=single-node"
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - 9200:9200
-      - 9300:9300
-    volumes:
-      - resource-es-data:/usr/share/elasticsearch/data
-    networks:
-      - resource-network
-  resource-logstash:
-    image: docker.elastic.co/logstash/logstash:8.7.0
-    command: logstash -f /usr/share/logstash/pipeline/logstash.conf
-    depends_on:
-      - resource-elasticsearch
-    ports:
-      - 5000:5000
-      - 9600:9600
-    volumes:
-      - ./util/docker/logstash/pipeline:/usr/share/logstash/pipeline
-      - ./util/docker/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-    networks:
-      - resource-network
-  resource-kibana:
-    image: docker.elastic.co/kibana/kibana:8.7.0
-    ports:
-      - 5601:5601
-    environment:
-      SERVER_BASEPATH: /kibana
-      ELASTICSEARCH_URL: http://resource-elasticsearch:9200
-      ELASTICSEARCH_HOSTS: '["http://resource-elasticsearch:9200"]'
-    depends_on:
-      - resource-elasticsearch
-    networks:
-      - resource-network
-  resource-prometheus:
-    image: prom/prometheus:v2.43.0
-    ports:
-      - '9090:9090'
-    volumes:
-      - ./util/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - resource-network
-  resource-grafana:
-    image: grafana/grafana:9.5.1
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
-    volumes:
-      - ./util/docker/grafana/grafana.ini:/etc/grafana/grafana.ini
-    depends_on:
-      - resource-prometheus
-    networks:
-      - resource-network
 volumes:
   resource-db-data:
     driver: local
   resource-s3-data:
-    driver: local
-  resource-es-data:
     driver: local
 networks:
   resource-network:
