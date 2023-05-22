@@ -2,6 +2,8 @@ package dev.amir.resourceservice.ct
 
 import dev.amir.resourceservice.App
 import dev.amir.resourceservice.domain.profile.Profiles
+import dev.amir.resourceservice.framework.output.rest.client.StorageServiceRestClient
+import org.spockframework.spring.SpringBean
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -44,6 +46,9 @@ class BaseCT extends Specification {
             .withEnv("SECRET_KEY", S3_SECRET_KEY)
             .withEnv("AWS_REGION", S3_REGION)
             .waitingFor(Wait.forLogMessage(".*Ready\\.\\n", 1))
+
+    @SpringBean
+    protected StorageServiceRestClient storageServiceRestClient = Mock(StorageServiceRestClient)
 
     @DynamicPropertySource
     private static void configure(DynamicPropertyRegistry registry) {

@@ -2,6 +2,7 @@ package dev.amir.resourceservice.ct.resource
 
 import com.amazonaws.services.s3.model.PutObjectResult
 import dev.amir.resourceservice.ct.BaseCT
+import dev.amir.resourceservice.framework.output.rest.response.GetStorageResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -23,7 +24,13 @@ class ResourceControllerCT extends BaseCT {
         def putResult = new PutObjectResult()
         putResult.ETag = "ETag"
 
-        expect:
+        when:
+        storageServiceRestClient.allStorages >> [
+                new GetStorageResponse(1L, "STAGING", "bucket-name", "custom/path/resource"),
+                new GetStorageResponse(2L, "PERMANENT", "bucket-name", "custom/path/resource")
+        ]
+
+        then:
         mockMvc.perform(MockMvcRequestBuilders.post("/resources").content(resourceData))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath('$.id').isNumber())
